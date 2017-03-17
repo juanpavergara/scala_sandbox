@@ -50,9 +50,25 @@ class SandboxSuite extends FunSuite {
     }
 
     /*
+    Se puede definir lo mismo pero con otra sintaxis como se hace a continuacion con la funcion bar
+    (hace exactamente lo mismo que foo). Importante tener en cuenta:
+
+    1. El tipo parametrizado es T:MyTypeClass y no T solito. Esto es una alternativa
+    que solo funciona para Type Classes de un solo tipo parametrizado.
+    2. Ya no hay segundo parametri implicit y se reemplaza por el implicitly en el cuerpo
+    de la funcion al evaluar myOp
+     */
+    def bar[T:MyTypeClass](t:T) : T = {
+      implicitly[MyTypeClass[T]].myOp(t)
+    }
+
+
+
+    /*
     La siguiente evaluacion funciona porque existe un implicit object MyTypeClassMemberForString
      */
     assert(foo("Juancho") == "Hello Juancho")
+    assert(bar("Juancho") == "Hello Juancho")
     /*
     La siguiente evaluacion no compila porque no existe definicion implicita de un MyTypeClass[Int]
      */
