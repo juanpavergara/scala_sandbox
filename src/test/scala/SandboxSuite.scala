@@ -1,6 +1,6 @@
 import org.scalatest._
 
-class SandboxSpec extends FunSuite {
+class SandboxSuite extends FunSuite {
 
   test("Smoke test"){
     assert(true)
