@@ -1,4 +1,13 @@
+import java.util.concurrent.Future
+
+import cats.Id
+import cats.data.Reader
+import co.com.sandbox.Behaviour.{CommandData, Config}
+import co.com.sandbox.BehaviourOneX.{CommandOneData, ConfigOne}
+import co.com.sandbox.{Auxiliar, ControllerBase}
 import org.scalatest._
+
+import scala.concurrent.Future
 
 class SandboxSuite extends FunSuite {
 
@@ -73,5 +82,17 @@ class SandboxSuite extends FunSuite {
     La siguiente evaluacion no compila porque no existe definicion implicita de un MyTypeClass[Int]
      */
     assertDoesNotCompile("foo(1) == \"Hello Juancho\"")
+  }
+
+  test("Command with Type Class"){
+    val f = (json:String) => CommandOneData(1,1)
+
+    trait MiAuxiliar extends Auxiliar {
+      val m: Map[String, (Config, (String) => CommandData)] = Map("comandoPrueba" -> (ConfigOne("config1"), f))
+      override def configs = m
+    }
+
+    val c = new ControllerBase() with MiAuxiliar
+    val r = c.ejecutar("comandoPrueba", "")
   }
 }
