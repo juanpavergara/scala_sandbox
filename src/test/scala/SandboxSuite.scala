@@ -2,9 +2,6 @@ import java.util.concurrent.Future
 
 import cats.Id
 import cats.data.Reader
-import co.com.sandbox.Behaviour.{CommandData, Config}
-import co.com.sandbox.BehaviourOneX.{CommandOneData, ConfigOne}
-import co.com.sandbox.{Auxiliar, ControllerBase}
 import org.scalatest._
 
 import scala.concurrent.Future
@@ -84,15 +81,34 @@ class SandboxSuite extends FunSuite {
     assertDoesNotCompile("foo(1) == \"Hello Juancho\"")
   }
 
-  test("Command with Type Class"){
-    val f = (json:String) => CommandOneData(1,1)
 
-    trait MiAuxiliar extends Auxiliar {
-      val m: Map[String, (Config, (String) => CommandData)] = Map("comandoPrueba" -> (ConfigOne("config1"), f))
-      override def configs = m
+  test("Subtyped type class"){
+    trait MySuperType
+    case class MySubtypeOne(name:String) extends MySuperType
+    case class MySubtypeTwo(value:Int) extends MySuperType
+
+    trait MyTypeClass[A<:MySuperType]{
+      def myOp():A
     }
 
-    val c = new ControllerBase() with MiAuxiliar
-    val r = c.ejecutar("comandoPrueba", "")
+    implicit object MyFirstMember extends MyTypeClass[MySubtypeOne]{
+      def myOp() = MySubtypeOne("fixed")
+    }
+
+    implicit object MySecondMember extends MyTypeClass[MySubtypeTwo]{
+      def myOp() = MySubtypeTwo(2)
+    }
+
+    def foo[T<:MySuperType](t:T)(implicit tc: MyTypeClass[T]) : T = {
+      tc.myOp
+    }
+
+    val r1 = foo(MySubtypeOne("first"))
+    val r2 = foo(MySubtypeTwo(1))
+
+    assert(r1 == MySubtypeOne("fixed"))
+    assert(r2 == MySubtypeTwo(2))
+
+
   }
 }
