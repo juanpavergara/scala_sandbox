@@ -99,6 +99,7 @@ class SandboxSuite extends FunSuite {
       def myOp() = MySubtypeTwo(2)
     }
 
+
     def foo[T<:MySuperType](t:T)(implicit tc: MyTypeClass[T]) : T = {
       tc.myOp
     }
@@ -109,6 +110,46 @@ class SandboxSuite extends FunSuite {
     assert(r1 == MySubtypeOne("fixed"))
     assert(r2 == MySubtypeTwo(2))
 
+
+  }
+
+  test("Subtyped type class 2"){
+    trait MySuperType
+    case class MySubtypeOne(name:String) extends MySuperType
+    case class MySubtypeTwo(value:Int) extends MySuperType
+
+    trait MyTypeClass[A<:MySuperType]{
+      def myOp():A
+    }
+
+    implicit object MyFirstMember extends MyTypeClass[MySubtypeOne]{
+      def myOp() = MySubtypeOne("fixed")
+    }
+
+    implicit object MySecondMember extends MyTypeClass[MySubtypeTwo]{
+      def myOp() = MySubtypeTwo(2)
+    }
+
+
+    def foo[T<:MySuperType](t:T)(implicit tc: MyTypeClass[T]) : T = {
+      tc.myOp
+    }
+
+    def produceT(i:Int): MySuperType = i%2 match {
+      case 0 => MySubtypeOne("one")
+      case _ => MySubtypeTwo(2)
+    }
+
+    val t = produceT(2)
+
+    t match {
+      case x: MySubtypeOne => {
+        assert(foo(x)==MySubtypeOne("fixed"))
+      }
+      case y: MySubtypeTwo => {
+        assert(foo(y)==MySubtypeTwo(2))
+      }
+    }
 
   }
 }
