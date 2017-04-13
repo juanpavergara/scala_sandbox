@@ -142,6 +142,9 @@ class SandboxSuite extends FunSuite {
 
     def bar[T<:MySuperType](t:T) = {
 
+      /*
+      Como lograr llamar a foo sin un pattern match?
+       */
       t match {
         case x: MySubtypeOne => {
           assert(foo(x)==MySubtypeOne("fixed"))
