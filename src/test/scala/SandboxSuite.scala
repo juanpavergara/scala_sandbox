@@ -154,6 +154,9 @@ class SandboxSuite extends FunSuite {
         }
       }
 
+
+      assertDoesNotCompile("foo(t)")
+
     }
 
     val t = produceT(2)
