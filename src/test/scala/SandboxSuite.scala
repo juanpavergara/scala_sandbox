@@ -140,16 +140,24 @@ class SandboxSuite extends FunSuite {
       case _ => MySubtypeTwo(2)
     }
 
-    val t = produceT(2)
+    def bar[T<:MySuperType](t:T) = {
 
-    t match {
-      case x: MySubtypeOne => {
-        assert(foo(x)==MySubtypeOne("fixed"))
+      t match {
+        case x: MySubtypeOne => {
+          assert(foo(x)==MySubtypeOne("fixed"))
+        }
+        case y: MySubtypeTwo => {
+          assert(foo(y)==MySubtypeTwo(2))
+        }
       }
-      case y: MySubtypeTwo => {
-        assert(foo(y)==MySubtypeTwo(2))
-      }
+
     }
 
+    val t = produceT(2)
+
+    bar(t)
+
+
   }
+
 }
