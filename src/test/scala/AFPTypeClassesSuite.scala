@@ -8,26 +8,26 @@ class AFPTypeClassesSuite extends FunSuite {
 
     case class ADT2(s: String, i:Int)
 
-    trait Conversor[T]{
-      def toADT(t:(String,Int)):T
+    trait Conversor[I, T]{
+      def toADT(t:I):T
     }
 
     object Conversor{
-      implicit object ConversorADT1 extends Conversor[ADT1]{
+      implicit object ConversorADT1 extends Conversor[Tuple2[String,Int],ADT1]{
         def toADT(t:(String, Int)) = ADT1(t._1, t._2)
       }
 
-      implicit object ConversorADT2 extends Conversor[ADT2]{
+      implicit object ConversorADT2 extends Conversor[Tuple2[String,Int],ADT2]{
         def toADT(t:(String, Int)) = ADT2(t._1, t._2)
       }
     }
 
-    def toADT[T](t:(String, Int))(implicit c: Conversor[T]):T = {
+    def toADT[I,T](t:I)(implicit c: Conversor[I,T]):T = {
         c.toADT(t)
     }
 
-    val adt1: ADT1 = toADT[ADT1](("a", 1))
-    val adt2: ADT2 = toADT[ADT2](("a", 1))
+    val adt1: ADT1 = toADT[Tuple2[String,Int], ADT1](("a", 1))
+    val adt2: ADT2 = toADT[Tuple2[String,Int], ADT2](("a", 1))
 
     assert(adt1.s == "a")
     assert(adt1.i == 1)
