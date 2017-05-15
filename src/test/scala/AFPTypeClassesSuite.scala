@@ -9,7 +9,6 @@ class AFPTypeClassesSuite extends FunSuite {
 
     trait Conversor[I, T]{
       def toADT(t:I):T
-//      def toADT: (I)=>T
     }
 
     trait ConversorSyntax{
@@ -39,12 +38,5 @@ class AFPTypeClassesSuite extends FunSuite {
 
     assert(adt1.s == "5")
     assert(adt1.i == 5)
-
-
   }
-
-
-
-
-
 }
