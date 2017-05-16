@@ -171,4 +171,106 @@ class AFPTypeClassesSuite extends FunSuite {
     bar(produceT(2))
     bar(produceT(1))
   }
+
+  test("Type class para wesura"){
+
+    trait MedioPago
+    case class TarjetaCredito() extends MedioPago
+    case class TarjetaDebito() extends MedioPago
+
+    trait Flujo
+    case class PagoComunidad() extends Flujo
+    case class PagoModificacionValorable() extends Flujo
+
+    case class Config(d1:String, d2:Int)
+
+    trait PaymentResponse
+
+    trait CreditCardResponse extends PaymentResponse
+    case class SuccessCreditCardResponse() extends CreditCardResponse
+    case class FailureCreditCardResponse() extends CreditCardResponse
+
+    trait DebitCardResponse extends PaymentResponse
+    case class SuccessDebitCardResponse() extends DebitCardResponse
+    case class FailureDebitCardResponse() extends DebitCardResponse
+
+    trait ProcesoPagoTypeClass[A<:MedioPago, B<:Flujo, C<:PaymentResponse]{
+      def pagar(c:Config):C
+    }
+
+    def verificarRgoConsultable(dni:String):Boolean = {
+      true
+      false
+      true
+      false
+      false
+      true
+    }
+
+    trait ProcesoPagoTypeClassInstances {
+
+      implicit def pagoComunidadCredito = new ProcesoPagoTypeClass[TarjetaCredito, PagoComunidad, CreditCardResponse] {
+        def pagar(c:Config) = {
+          println("Pago de comunidad con TC OK")
+          verificarRgoConsultable("8027133")
+          SuccessCreditCardResponse()
+        }
+      }
+
+      implicit def pagoComunidadDebito = new ProcesoPagoTypeClass[TarjetaDebito, PagoComunidad, DebitCardResponse] {
+        def pagar(c:Config) = {
+          println("Pago de comunidad con TD OK")
+          verificarRgoConsultable("8027133")
+          SuccessDebitCardResponse()
+        }
+      }
+
+      implicit def pagoModificacionValorableCredito = new ProcesoPagoTypeClass[TarjetaCredito, PagoModificacionValorable, CreditCardResponse] {
+        def pagar(c:Config) = {
+          println("Pago de modificacion con TC OK")
+          verificarRgoConsultable("8027133")
+          SuccessCreditCardResponse()
+        }
+      }
+
+      implicit def pagoModificacionValorableDebito = new ProcesoPagoTypeClass[TarjetaDebito, PagoModificacionValorable, DebitCardResponse] {
+        def pagar(c:Config) = {
+          println("Pago de modificacion con TD OK")
+          verificarRgoConsultable("8027133")
+          SuccessDebitCardResponse()
+        }
+      }
+
+    }
+
+    trait ProcesoPagoTypeClassSyntax  {
+      implicit class ProcesoPagoTypeClassOps[P<:Payment](i:P){
+        def pagar[A<:MedioPago, B<:Flujo, C<:PaymentResponse](c:Config)(implicit p:ProcesoPagoTypeClass[A,B,C]): C = p.pagar(c)
+      }
+    }
+
+    object pagosInstances extends ProcesoPagoTypeClassInstances with ProcesoPagoTypeClassSyntax
+
+
+    /////////////////////////////////////////////
+    //Controller
+    trait Payment
+    case class CreditCardInfo(info:String) extends Payment
+    case class DebitCardInfo(info:String) extends Payment
+
+    object TransactionsController{
+      def createCreditCardTransactionForContribution = {
+        import pagosInstances._
+        val cci = CreditCardInfo("INFORMACION CONCRETA")
+        val c:Config = Config("string1", 666)
+        cci.pagar[TarjetaCredito,PagoModificacionValorable,CreditCardResponse](c)
+      }
+    }
+
+    TransactionsController.createCreditCardTransactionForContribution
+
+
+    /////////////////////////////////////////////
+
+  }
 }
