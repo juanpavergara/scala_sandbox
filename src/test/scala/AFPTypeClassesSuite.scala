@@ -23,6 +23,7 @@ class AFPTypeClassesSuite extends FunSuite {
       }
 
       implicit def ConversorADT2 = new Conversor[(String,Int),ADT2]{
+
         def toADT(t:(String, Int)) = ADT2(t._1, t._2)
       }
 
@@ -38,5 +39,66 @@ class AFPTypeClassesSuite extends FunSuite {
 
     assert(adt1.s == "5")
     assert(adt1.i == 5)
+  }
+
+  test("Ejercicio type class con subtipado"){
+
+    trait MySuperType
+    case class MySubtypeOne(name:String) extends MySuperType
+    case class MySubtypeTwo(value:Int) extends MySuperType
+
+    trait MyTypeClass[T<:MySuperType]{
+      def myOp():T
+    }
+
+    trait MyTypeClassInstances extends MyTypeClassSyntax{
+
+      implicit def MyFirstMember = new MyTypeClass[MySubtypeOne] {
+        def myOp() = MySubtypeOne("fixed")
+      }
+
+      implicit def MySecondMember = new MyTypeClass[MySubtypeTwo] {
+        def myOp() = MySubtypeTwo(2)
+      }
+
+    }
+
+    trait MyTypeClassSyntax   {
+      implicit class MyTypeClassOps[T<:MySuperType](i:T){
+         def myOp(implicit c:MyTypeClass[T]): T = c.myOp
+      }
+    }
+
+
+    def produceT(i:Int): MySuperType = i%2 match {
+      case 0 => MySubtypeOne("one")
+      case _ => MySubtypeTwo(2)
+    }
+
+    object o extends MyTypeClassInstances
+
+    def bar[T<:MySuperType](t:T) = {
+
+      /*
+      Como lograr llamar a foo sin un pattern match?
+       */
+
+      import o._
+
+      t match {
+        case x: MySubtypeOne => {
+          assert(x.myOp ==MySubtypeOne("fixed"))
+        }
+        case y: MySubtypeTwo => {
+          assert(y.myOp == MySubtypeTwo(2))
+        }
+      }
+
+      assertDoesNotCompile("foo(t)")
+
+    }
+
+    bar(produceT(2))
+    bar(produceT(1))
   }
 }

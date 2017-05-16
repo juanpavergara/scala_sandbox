@@ -113,56 +113,7 @@ class SandboxSuite extends FunSuite {
 
   }
 
-  test("Subtyped type class 2"){
-    trait MySuperType
-    case class MySubtypeOne(name:String) extends MySuperType
-    case class MySubtypeTwo(value:Int) extends MySuperType
 
-    trait MyTypeClass[A<:MySuperType]{
-      def myOp():A
-    }
-
-    implicit object MyFirstMember extends MyTypeClass[MySubtypeOne]{
-      def myOp() = MySubtypeOne("fixed")
-    }
-
-    implicit object MySecondMember extends MyTypeClass[MySubtypeTwo]{
-      def myOp() = MySubtypeTwo(2)
-    }
-
-
-    def foo[T<:MySuperType](t:T)(implicit tc: MyTypeClass[T]) : T = {
-      tc.myOp
-    }
-
-    def produceT(i:Int): MySuperType = i%2 match {
-      case 0 => MySubtypeOne("one")
-      case _ => MySubtypeTwo(2)
-    }
-
-    def bar[T<:MySuperType](t:T) = {
-
-      /*
-      Como lograr llamar a foo sin un pattern match?
-       */
-      t match {
-        case x: MySubtypeOne => {
-          assert(foo(x)==MySubtypeOne("fixed"))
-        }
-        case y: MySubtypeTwo => {
-          assert(foo(y)==MySubtypeTwo(2))
-        }
-      }
-
-
-      assertDoesNotCompile("foo(t)")
-
-    }
-
-    val t = produceT(2)
-
-    bar(t)
-  }
 
   test("Currying vs Partial Functions"){
 
