@@ -119,6 +119,8 @@ class AFPTypeClassesSuite extends FunSuite {
 
     /*
     Para que el llamado a bar al final de este test funcione se necesita hacer al type class covariante en T
+    Esta covarianza empeora las cosas porque puede que bar sea llamado con un type member de un tipo que no corresponde a T
+    La conclusión a la que llegamos es que no vale la pena el riesgo dado que es inseguro en tiempo de compilacion
      */
     trait MyTypeClass[+T<:MySuperType]{
       def myOp():T
