@@ -113,7 +113,7 @@ class AFPTypeClassesSuite extends FunSuite {
 
   test("Ejercicio type class con subtipado"){
 
-    class MySuperType
+    trait MySuperType
     case class MySubtypeOne(name:String) extends MySuperType
     case class MySubtypeTwo(value:Int) extends MySuperType
 
