@@ -113,11 +113,14 @@ class AFPTypeClassesSuite extends FunSuite {
 
   test("Ejercicio type class con subtipado"){
 
-    trait MySuperType
+    class MySuperType
     case class MySubtypeOne(name:String) extends MySuperType
     case class MySubtypeTwo(value:Int) extends MySuperType
 
-    trait MyTypeClass[T<:MySuperType]{
+    /*
+    Para que el llamado a bar al final de este test funcione se necesita hacer al type class covariante en T
+     */
+    trait MyTypeClass[+T<:MySuperType]{
       def myOp():T
     }
 
@@ -147,30 +150,28 @@ class AFPTypeClassesSuite extends FunSuite {
 
     object o extends MyTypeClassInstances
 
-    def bar[T<:MySuperType](t:T) = {
-
-      /*
-      Como lograr llamar a foo sin un pattern match?
-       */
-
+    /*
+    Para que bar no tenga que hacer pattern match debe recibir como implicit el type member
+    En resumen: alguien, en algún momento debe saber el tipo específico contra el que se hará la evaluación de myOp
+    Si es en bar, entonces bar debe hacer pattern match (para saber el tipo específico y usar el type member adecuado
+    Si es por fuera, entonces debe ser en el llamado de bar (ver abajo los llamados)
+     */
+    def bar[T<:MySuperType](t:T)(implicit c:MyTypeClass[T]) = {
       import o._
-
-      t match {
-        case x: MySubtypeOne => {
-          assert(x.myOp ==MySubtypeOne("fixed"))
-        }
-        case y: MySubtypeTwo => {
-          assert(y.myOp == MySubtypeTwo(2))
-        }
-      }
-
-      assertDoesNotCompile("foo(t)")
-
+      t.myOp
     }
 
-    bar(produceT(2))
-    bar(produceT(1))
+    /*
+    En este momento se indica el type member específico con el cual se debe realizar la evaluación de myOp
+     */
+    val r1 = bar(produceT(0))(o.MyFirstMember)
+    val r2 = bar(produceT(1))(o.MySecondMember)
+
+
+    assert(r1 == MySubtypeOne("fixed"))
+    assert(r2 == MySubtypeTwo(2))
   }
+
 
 
 }
