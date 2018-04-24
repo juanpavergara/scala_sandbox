@@ -169,9 +169,17 @@ class AFPTypeClassesSuite extends FunSuite {
     val r1 = bar(produceT(0))(o.MyFirstMember)
     val r2 = bar(produceT(1))(o.MySecondMember)
 
+    /*
+    Este es el problema tremendo de esta aproximacion. Siendo el parámetro de la evaluacion un MySubtypeTwo(2)
+    el compilador acepta el type member de MySubtypeOne y evalúa con ese type member :(
+    Esto es demasiado inseguro y hace que la aproximación no sea válida
+     */
+    val r3 = bar(produceT(1))(o.MyFirstMember)
+
 
     assert(r1 == MySubtypeOne("fixed"))
     assert(r2 == MySubtypeTwo(2))
+    assert(r3 != MySubtypeTwo(2))
   }
 
 
