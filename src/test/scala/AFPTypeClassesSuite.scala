@@ -172,7 +172,7 @@ class AFPTypeClassesSuite extends FunSuite {
     bar(produceT(1))
   }
 
-  test("Ejercicio type class con subtipado (con covarianza"){
+  test("Ejercicio type class con subtipado (con covarianza)"){
 
     trait MySuperType
     case class MySubtypeOne(name:String) extends MySuperType
@@ -242,7 +242,5 @@ class AFPTypeClassesSuite extends FunSuite {
     assert(r2 == MySubtypeTwo(2))
     assert(r3 != MySubtypeTwo(2))
   }
-
-
 
 }
